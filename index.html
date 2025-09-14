@@ -324,10 +324,7 @@ body.dark .footer {
 print("Hello, World!")</pre>
     </div>
   </div>
-  <div class="footer">
-    <p>Multi-Language IDE &copy; 2023 | Powered by Judge0 API</p>
   </div>
-</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/clike/clike.min.js"></script>
@@ -426,13 +423,13 @@ function toggleTheme() {
   editor.setOption("theme", body.classList.contains("dark") ? "dracula" : "eclipse");
 }
 
-
+// Add keyboard shortcut for running code (Ctrl+Enter)
 editor.setOption("extraKeys", {
   ...editor.getOption("extraKeys"),
   "Ctrl-Enter": runCode
 });
 
-
+// Prevent right-click and developer tools
 document.addEventListener("contextmenu", (e) => e.preventDefault());
 document.addEventListener("keydown", (e) => {
   if (e.key === "F12" ||
@@ -443,7 +440,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-
+// Initialize with Python
 window.onload = () => {
   loadTemplate("71", "python");
   document.getElementById("output").innerText = "# Welcome to Multi-Language IDE\n# Select a language from the sidebar or click \"Run Code\" to execute the current program\n\nprint(\"Hello, World!\")";
