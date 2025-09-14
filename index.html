@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>🌐 Multi-Language IDE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/theme/dracula.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/theme/eclipse.min.css">
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0; height:100vh; display:flex; overflow:hidden; }
+    body.light { background:#f8f9fa; color:#212529; }
+    body.dark { background:#121212; color:#eaeaea; }
+    .sidebar { width:220px; background:#1e1e1e; color:white; padding:15px; overflow-y:auto; display:flex; flex-direction:column; }
+    .sidebar h2 {font-size:18px;margin-bottom:15px;text-align:center;border-bottom:1px solid #444;}
+    .lang-list {display:flex;flex-direction:column;gap:8px;}
+    .lang-btn {padding:12px;background:#333;color:white;cursor:pointer;border:none;border-radius:6px;transition:0.2s;}
+    .lang-btn:hover, .lang-btn.active {background:#0078d7;}
+    .main {flex:1;display:flex;flex-direction:column;}
+    .header {display:flex;justify-content:space-between;align-items:center;padding:10px 15px;background:#f0f0f0;border-bottom:1px solid #ddd;}
+    body.dark .header {background:#1e1e1e;border-bottom:1px solid #333;}
+    .header-buttons {display:flex;align-items:center;gap:10px;}
+    .theme-toggle, .run-btn {padding:8px 16px;font-size:14px;border:none;border-radius:6px;cursor:pointer;transition:0.2s;}
+    .theme-toggle {background:#0078d7;color:#fff;}
+    .theme-toggle:hover {background:#005fa3;}
+    .run-btn {background:#28a745;color:white;}
+    .run-btn:hover {background:#218838;}
+    .split-container {flex:1;display:flex;}
+    .editor-container {flex:1;display:flex;flex-direction:column;}
+    .editor-header {display:flex;justify-content:space-between;align-items:center;padding:8px 15px;background:#f5f5f5;border-bottom:1px solid #ddd;}
+    body.dark .editor-header {background:#252526;border-bottom:1px solid #333;}
+    #editor {flex:1;height:100%;}
+    .CodeMirror {height:100%!important;font-size:16px;}
+    .output-container {width:35%;display:flex;flex-direction:column;border-left:1px solid #ddd;}
+    body.dark .output-container {border-left:1px solid #333;}
+    .output-header {display:flex;justify-content:space-between;align-items:center;padding:8px 15px;background:#f5f5f5;}
+    body.dark .output-header {background:#252526;}
+    #output {flex:1;background:#1e1e1e;color:#00ff00;padding:12px;overflow:auto;font-family:'Consolas',monospace;font-size:14px;}
+    .footer {padding:10px;text-align:center;font-size:12px;color:#6c757d;border-top:1px solid #ddd;}
+    body.dark .footer {border-top:1px solid #444;color:#aaa;}
+  </style>
+</head>
+<body class="light">
+  <div class="sidebar">
+    <h2>Languages</h2>
+    <div class="lang-list">
+      <button class="lang-btn" onclick="loadTemplate('50','text/x-csrc',this)">🔵 C</button>
+      <button class="lang-btn" onclick="loadTemplate('54','text/x-c++src',this)">💻 C++</button>
+      <button class="lang-btn" onclick="loadTemplate('62','text/x-java',this)">☕ Java</button>
+      <button class="lang-btn active" onclick="loadTemplate('71','python',this)">🐍 Python</button>
+      <button class="lang-btn" onclick="loadTemplate('63','javascript',this)">⚡ JavaScript</button>
+      <button class="lang-btn" onclick="loadTemplate('74','javascript',this)">🔷 TypeScript</button>
+      <button class="lang-btn" onclick="loadTemplate('72','ruby',this)">💎 Ruby</button>
+      <button class="lang-btn" onclick="loadTemplate('68','php',this)">🐘 PHP</button>
+      <button class="lang-btn" onclick="loadTemplate('51','text/x-csharp',this)">🎯 C#</button>
+      <button class="lang-btn" onclick="loadTemplate('83','swift',this)">🍏 Swift</button>
+      <button class="lang-btn" onclick="loadTemplate('78','kotlin',this)">📱 Kotlin</button>
+      <button class="lang-btn" onclick="loadTemplate('80','r',this)">📊 R</button>
+      <button class="lang-btn" onclick="loadTemplate('46','shell',this)">🐚 Bash</button>
+      <button class="lang-btn" onclick="loadTemplate('82','sql',this)">🗄 SQL</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="header">
+      <h1 id="pageTitle">🐍 Python IDE</h1>
+      <div class="header-buttons">
+        <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark/Light</button>
+        <button class="run-btn" onclick="runCode()">▶ Run Code</button>
+      </div>
+    </div>
+    <div class="split-container">
+      <div class="editor-container">
+        <div class="editor-header">
+          <h3>Editor</h3>
+          <span>Ctrl+Enter to run</span>
+        </div>
+        <div id="editor"></div>
+      </div>
+      <div class="output-container">
+        <div class="output-header">
+          <h3>Output</h3>
+        </div>
+        <pre id="output"># Welcome to Multi-Language IDE
+print("Hello, World!")</pre>
+      </div>
+    </div>
+     </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.js"></script>
+  <!-- Load modes for all languages -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/clike/clike.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/php/php.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/ruby/ruby.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/sql/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/shell/shell.min.js"></script>
+  <script>
+    let editor = CodeMirror(document.getElementById("editor"), {
+      value: "print('Hello, World!')",
+      mode: "python",
+      theme: "eclipse",
+      lineNumbers: true,
+      autoCloseBrackets: true,
+      matchBrackets: true,
+      indentUnit: 4,
+      lineWrapping: true,
+      extraKeys: {"Ctrl-Space": "autocomplete", "Ctrl-Enter": runCode}
+    });
+
+    const languages = {
+      "50": { title: "🔵 C IDE", code: "#include <stdio.h>\n\nint main() {\n    printf(\"Hello, World!\\n\");\n    return 0;\n}" },
+      "54": { title: "💻 C++ IDE", code: "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello, World!\" << endl;\n    return 0;\n}" },
+      "62": { title: "☕ Java IDE", code: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, World!\");\n    }\n}" },
+      "71": { title: "🐍 Python IDE", code: "print(\"Hello, World!\")" },
+      "63": { title: "⚡ JavaScript IDE", code: "console.log('Hello, World!');" },
+      "74": { title: "🔷 TypeScript IDE", code: "console.log('Hello, World!');" },
+      "72": { title: "💎 Ruby IDE", code: "puts 'Hello, World!'" },
+      "68": { title: "🐘 PHP IDE", code: "<?php\necho \"Hello, World!\\n\";\n?>" },
+      "51": { title: "🎯 C# IDE", code: "using System;\nclass Program {\n    static void Main() {\n        Console.WriteLine(\"Hello, World!\");\n    }\n}" },
+      "83": { title: "🍏 Swift IDE", code: "print(\"Hello, World!\")" },
+      "78": { title: "📱 Kotlin IDE", code: "fun main() {\n    println(\"Hello, World!\")\n}" },
+      "80": { title: "📊 R IDE", code: "print('Hello, World!')" },
+      "46": { title: "🐚 Bash IDE", code: "echo \"Hello, World!\"" },
+      "82": { title: "🗄 SQL IDE", code: "SELECT 'Hello, World!' AS message;" }
+    };
+
+    function loadTemplate(langId, mode, btn) {
+      editor.setValue(languages[langId].code);
+      editor.setOption("mode", mode);
+      editor.getWrapperElement().dataset.lang = langId;
+      document.getElementById("pageTitle").textContent = languages[langId].title;
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    async function runCode() {
+      const langId = editor.getWrapperElement().dataset.lang || "71";
+      const sourceCode = editor.getValue();
+      const outputEl = document.getElementById("output");
+      outputEl.innerText = "⏳ Running your code...";
+      try {
+        const response = await fetch("https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+            "x-rapidapi-key": "ea470a2c3fmshff10f28d54ab1e6p1bf78cjsnb69ca428d174"
+          },
+          body: JSON.stringify({ source_code: sourceCode, language_id: langId, stdin: "" })
+        });
+        if (!response.ok) throw new Error(`API error: ${response.status}`);
+        const result = await response.json();
+        let output = "";
+        if (result.compile_output) output += "Compilation Error:\n" + result.compile_output + "\n";
+        if (result.stderr) output += "Runtime Error:\n" + result.stderr + "\n";
+        if (result.stdout) output += result.stdout + "\n";
+        if (result.message) output += "System Message:\n" + result.message + "\n";
+        if (output === "") output = "⚠ No output generated";
+        outputEl.innerText = output;
+      } catch (err) {
+        outputEl.innerText = "❌ Error: " + err.message;
+      }
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      body.classList.toggle("dark");
+      body.classList.toggle("light");
+      editor.setOption("theme", body.classList.contains("dark") ? "dracula" : "eclipse");
+    }
+
+    // Prevent right-click (optional)
+    document.addEventListener("contextmenu", e => e.preventDefault());
+    // Prevent F12/dev tools (optional)
+    document.addEventListener("keydown", e => {
+      if (e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) ||
+        (e.ctrlKey && e.key === "U")) {
+        e.preventDefault();
+        alert("Developer tools are disabled in this environment.");
+      }
+    });
+
+    window.onload = () => {
+      loadTemplate("71", "python", document.querySelector('.lang-btn.active'));
+    };
+  </script>
+</body>
+</html>
