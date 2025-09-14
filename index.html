@@ -231,7 +231,7 @@
         headers: {
           "Content-Type": "application/json",
           "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
-          "x-rapidapi-key": "ea470a2c3fmshff10f28d54ab1e6p1bf78cjsnb69ca428d174" // Replace with Judge0 key
+          "x-rapidapi-key": "ea470a2c3fmshff10f28d54ab1e6p1bf78cjsnb69ca428d174" // Replace with your Judge0 API key
         },
         body: JSON.stringify({
           source_code: sourceCode,
@@ -258,7 +258,18 @@
       editor.setOption("theme", body.classList.contains("dark") ? "dracula" : "eclipse");
     }
 
-    window.onload = () => loadTemplate("71", "python"); // Default Python
+    window.onload = () => loadTemplate("71", "python");
+
+    // 🔒 Disable Inspect (basic protection)
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "F12" ||
+          (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) ||
+          (e.ctrlKey && e.key === "U")) {
+        e.preventDefault();
+        alert("🚫 Inspect option is disabled!");
+      }
+    });
   </script>
 </body>
 </html>
